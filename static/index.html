@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verset du jour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,560;1,9..144,420&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #12141f;
+    --bg-panel: #1a1d2b;
+    --bg-panel-edge: #232740;
+    --text-primary: #ede6d6;
+    --text-muted: #8b8fa3;
+    --accent-gold: #c9a227;
+    --accent-ember: #b5651d;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Signature : lueur de lampe qui respire doucement derrière la carte,
+     écho discret de Psaume 119:105 — "ta parole est une lampe à mes pieds" */
+  .glow {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 640px;
+    height: 640px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(201, 162, 39, 0.16) 0%, rgba(201, 162, 39, 0.05) 40%, transparent 70%);
+    pointer-events: none;
+    animation: breathe 6s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glow { animation: none; }
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 620px;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    margin-bottom: 28px;
+  }
+
+  .eyebrow .flame {
+    color: var(--accent-gold);
+    font-size: 14px;
+  }
+
+  .eyebrow .date {
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: none;
+  }
+
+  .card {
+    background: linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-panel-edge) 100%);
+    border: 1px solid rgba(201, 162, 39, 0.18);
+    border-radius: 4px;
+    padding: 56px 48px;
+    text-align: center;
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6);
+  }
+
+  .verse-text {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-optical-sizing: auto;
+    font-weight: 380;
+    font-size: clamp(22px, 4vw, 30px);
+    line-height: 1.55;
+    color: var(--text-primary);
+    margin: 0 0 32px 0;
+    min-height: 3.4em;
+    transition: opacity 0.4s ease;
+  }
+
+  .verse-text.loading {
+    opacity: 0.35;
+  }
+
+  .verse-ref {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 560;
+    font-size: 15px;
+    letter-spacing: 0.03em;
+    color: var(--accent-gold);
+  }
+
+  .verse-ref::before {
+    content: '— ';
+  }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+  }
+
+  .error-note {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 13px;
+    color: var(--accent-ember);
+  }
+
+  .notify-btn {
+    display: block;
+    margin: 24px auto 0;
+    background: transparent;
+    border: 1px solid rgba(201, 162, 39, 0.4);
+    color: var(--accent-gold);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    padding: 10px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .notify-btn:hover {
+    background: rgba(201, 162, 39, 0.1);
+    border-color: var(--accent-gold);
+  }
+
+  .notify-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .notify-status {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="glow" aria-hidden="true"></div>
+
+<main>
+  <div class="eyebrow">
+    <span class="flame">✦</span>
+    <span>Verset du jour</span>
+    <span class="date" id="today-date"></span>
+  </div>
+
+  <div class="card">
+    <p class="verse-text loading" id="verse-text">Le verset se prépare&hellip;</p>
+    <p class="verse-ref" id="verse-ref" style="visibility:hidden;">Référence</p>
+  </div>
+
+  <p class="footer-note" id="footer-note">Un même verset accompagne toute la journée. Reviens demain pour le suivant.</p>
+
+  <button class="notify-btn" id="notify-btn">Activer les notifications</button>
+  <p class="notify-status" id="notify-status"></p>
+</main>
+
+<script>
+  const dateEl = document.getElementById('today-date');
+  dateEl.textContent = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const textEl = document.getElementById('verse-text');
+  const refEl = document.getElementById('verse-ref');
+  const footerEl = document.getElementById('footer-note');
+
+  fetch('/api/verset')
+    .then((res) => {
+      if (!res.ok) throw new Error('Réponse invalide');
+      return res.json();
+    })
+    .then((data) => {
+      textEl.textContent = `\u00AB\u00A0${data.text}\u00A0\u00BB`;
+      textEl.classList.remove('loading');
+      refEl.textContent = data.reference;
+      refEl.style.visibility = 'visible';
+    })
+    .catch(() => {
+      textEl.textContent = 'Le verset n\u2019a pas pu être chargé.';
+      textEl.classList.remove('loading');
+      footerEl.textContent = 'Réessaie dans un instant.';
+      footerEl.classList.add('error-note');
+    });
+
+  // --- Notifications navigateur ---
+  const notifyBtn = document.getElementById('notify-btn');
+  const notifyStatus = document.getElementById('notify-status');
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+  }
+
+  async function setupNotifications() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      notifyBtn.disabled = true;
+      notifyStatus.textContent = 'Notifications non prises en charge par ce navigateur.';
+      return;
+    }
+
+    const registration = await navigator.serviceWorker.register('/static/sw.js');
+    const existing = await registration.pushManager.getSubscription();
+
+    if (existing) {
+      notifyBtn.textContent = 'Notifications activées';
+      notifyBtn.disabled = true;
+      notifyStatus.textContent = 'Notifications actives ✓';
+      return;
+    }
+
+    notifyBtn.addEventListener('click', async () => {
+      notifyBtn.disabled = true;
+      notifyStatus.textContent = 'Activation…';
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          notifyStatus.textContent = 'Permission refusée.';
+          notifyBtn.disabled = false;
+          return;
+        }
+
+        const keyRes = await fetch('/api/vapid-public-key');
+        const { publicKey } = await keyRes.json();
+
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+
+        await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscription),
+        });
+
+        notifyBtn.textContent = 'Notifications activées';
+        notifyStatus.textContent = 'Notifications actives ✓';
+      } catch (err) {
+        notifyStatus.textContent = 'Impossible d\u2019activer les notifications.';
+        notifyBtn.disabled = false;
+      }
+    });
+  }
+
+  setupNotifications();
+</script>
+
+</body>
+</html>
