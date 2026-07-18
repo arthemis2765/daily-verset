@@ -194,7 +194,10 @@ VERSES = [
 
     },
     {
-        
+        "reference": "Proverbes 22:24 ",
+        "text":(
+            "Ne deviens pas l’ami d’un homme coléreux. Ne va pas avec quelqu’un qui se met en colère facilement."
+        )
     }
 ]
 
